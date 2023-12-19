@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   CButton,
   CCard,
@@ -16,24 +16,82 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
+import axios from 'axios'
+import Swal from 'sweetalert2'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { AuthContext } from '../../../Provider/AuthProvider'
 
 const Login = () => {
+
+  const {auth, checkUser} = useContext(AuthContext)
+
+  const [user, setUser] = useState({
+    username: '',
+    password: ''
+  });
+
+  const navigate = useNavigate();
+
+  const [disable, setDisable] = useState(false)
+
+  const handleChange = (e) => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value
+    })
+  }
+
+
+
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const button = document.getElementById('login');
+    const button_text = button.textContent;
+    button.textContent = 'Loading...'
+    button.style.cursor = 'wait'
+    setDisable(true)
+    axios.post('/auth/login',user).then(response => {
+      setDisable(false)
+        button.textContent = button_text;
+        button.style.cursor = 'pointer';
+        if(response.data.status === 200){
+          Swal.fire('Success',response.data.message,'success')
+          localStorage.setItem('token',response.data.token)
+          checkUser()
+        }else if(response.data.status === 401){
+          response.data.errors.forEach(el =>{
+            toast.error(el,{
+              position: 'top-right'
+            })
+          })
+        }else if(response.data.status === 402){
+          toast.error(response.data.message,{
+            position: 'top-right'
+          })
+        }
+    })
+  }
+
+
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
+      <ToastContainer />
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={8}>
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
+                  <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-medium-emphasis">Sign In to your account</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput onChange={handleChange} value={user.username} name='username' placeholder="Username" autoComplete="username" />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -43,11 +101,14 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        onChange={handleChange}
+                        value={user.password}
+                        name='password'
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton type='submit' color="primary" id='login' className="px-4" disabled={disable}>
                           Login
                         </CButton>
                       </CCol>

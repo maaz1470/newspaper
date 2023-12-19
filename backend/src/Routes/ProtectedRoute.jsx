@@ -5,7 +5,10 @@ import { Navigate } from 'react-router-dom';
 import { AuthContext } from './../Provider/AuthProvider';
 
 const ProtectedRoute = ({children}) => {
-    const {auth} = useContext(AuthContext)
+    const {auth, loading} = useContext(AuthContext)
+    if(loading){
+        return 'Loading...';
+    }
     if(auth){
         return children;
     }else{

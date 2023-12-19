@@ -6,14 +6,32 @@ import React, { createContext, useEffect, useState } from 'react'
 export const AuthContext = createContext(null)
 
 const AuthProvider = ({ children }) => {
-    const [auth, setAuth] = useState(true)
+    const [auth, setAuth] = useState(false)
+    const [loading, setLoading] = useState(true)
+
+    const checkUser = () => {
+        axios.get('/checkAuth').then(response => {
+            setLoading(false)
+            if(response.data.status === 200){
+                setAuth(true)
+            }
+        }).catch(error => {
+            setLoading(false)
+            // console.clear()
+        })
+    }
 
     useEffect(() => {
-        // axios.get()
+        checkUser()
+        return () => checkUser()
     },[])
 
+    
+
     const userInfo = {
-        auth
+        loading,
+        auth,
+        checkUser
     }
     return (
         <AuthContext.Provider value={userInfo}>

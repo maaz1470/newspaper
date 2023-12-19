@@ -5,6 +5,9 @@ import AuthLayout from "./../views/pages/Auth/AuthLayout";
 import Login from "./../views/pages/login/Login";
 import Register from "./../views/pages/register/Register";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import Categories from "../views/pages/Category/Categories";
+import CategoryLayout from "../views/pages/Category/CategoryLayout";
+import AddCategory from "../views/pages/Category/AddCategory";
 
 const router = createBrowserRouter([
     {
@@ -14,6 +17,20 @@ const router = createBrowserRouter([
             {
                 path: '',
                 element: <Dashboard />
+            },
+            {
+                path: 'category',
+                element: <CategoryLayout />,
+                children: [
+                    {
+                        path: '',
+                        element: <Categories />
+                    },
+                    {
+                        path: 'add',
+                        element: <AddCategory />
+                    }
+                ]
             }
         ]
     },
