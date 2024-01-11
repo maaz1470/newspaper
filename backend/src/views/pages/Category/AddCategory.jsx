@@ -14,12 +14,27 @@ import {
   } from '@coreui/react'
   import { DocsExample } from './../../../components'
 import axios from 'axios';
-
+import TagsInput from 'react-tagsinput';
+import 'react-tagsinput/react-tagsinput.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
+import Swal from 'sweetalert2';
 const AddCategory = () => {
     const [category, setCategory] = useState({
         name: '',
-        status: 1
+        status: 1,
+        meta_title: '',
+        meta_description: '',
+        meta_keywords: []
     })
+    const [loading, setLoading] = useState(false)
+
+    const handleTagChange = (e) => {
+        setCategory({
+            ...category,
+            meta_keywords: e
+        })
+    }
 
     const handleChange = (e) => {
         setCategory({
@@ -30,15 +45,30 @@ const AddCategory = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        setLoading(true)
         axios.post('/category/add',category).then(response => {
-            console.log(response)
+            if(response.data.status === 401){
+                response.data.errors.forEach(el => toast.error(el,{
+                    position: 'top-right'
+                }))
+            }else if(response.data.status === 200){
+                Swal.fire('Success',response.data.message,'success')
+                setCategory({
+                    name: '',
+                    status: 1, 
+                    meta_title: '',
+                    meta_description: '',
+                    meta_keywords: []
+                })
+            }
+            setLoading(false)
         })
 
     }
 
     return (
         <CRow>
+            <ToastContainer />
             <CCol xs={12}>
                 <CCard className="mb-4">
                 <CCardHeader>
@@ -63,8 +93,32 @@ const AddCategory = () => {
                                 <option value="0">Unpublished</option>
                             </select>
                         </div>
+                        <br />
+                        <strong>SEO</strong>
+                        
                         <div className="mb-3">
-                            <button type='submit' className='btn btn-success text-white'>Submit</button>
+                            <CFormInput
+                                type="text"
+                                id="name"
+                                onChange={handleChange}
+                                name='meta_title'
+                                value={category.meta_title}
+                                placeholder="Meta Title"
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <CFormTextarea 
+                                onChange={handleChange}
+                                name='meta_description'
+                                value={category.meta_description}
+                                placeholder='Meta Description'
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <TagsInput className='form-control' onChange={handleTagChange} value={category.meta_keywords} />
+                        </div>
+                        <div className="mb-3">
+                            <button type='submit' className='btn btn-success text-white' disabled={loading}>{loading ? 'Processing...' : 'Submit'}</button>
                         </div>
                     </CForm>
                 </CCardBody>

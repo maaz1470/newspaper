@@ -31,7 +31,8 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::prefix('category')->group(function(){
         Route::name('category.')->group(function(){
-            Route::get('/add',[CategoryController::class, 'add'])->name('create');
+            Route::post('/add',[CategoryController::class, 'add'])->name('create');
+            Route::get('/{currentPage}/{showPerPage}',[CategoryController::class, 'all'])->name('all');
         });
     });
 

@@ -51,9 +51,9 @@ const Register = () => {
       axios.post('/auth/registration',user).then(response => {
         if(response.data.status === 200){
           Swal.fire('Success',response.data.message,'success')
-          // navigate('/auth/login',{
-          //   replace: true
-          // })
+          navigate('/auth/login',{
+            replace: true
+          })
         }else if(response.data.status === 401){
           response.data.errors.forEach(el => {
             toast.error(el,{
