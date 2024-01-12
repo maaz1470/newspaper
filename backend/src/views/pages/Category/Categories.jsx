@@ -22,13 +22,16 @@ const Categories = () => {
     const [categories, setCategories] = useState([])
     const [totalCategories, setTotalCategories] = useState(0)
     const [currentPage, setCurrentPage] = useState(0)
-    const [showPerPage, setShowPerPage] = useState(3)
+    const [showPerPage, setShowPerPage] = useState(10)
+    const [loading, setLoading] = useState(true)
     useEffect(() => {
         const subscribe = async function(){
-            const result = await axios.get(`/category/${currentPage}/${showPerPage}`).then(response => {
-                // setCategories(response.data.categories)
-                // setTotalCategories(response.data.categories.length)
-                console.log(response)
+            const result = await axios.get(`/category?page=${currentPage}&limit=${showPerPage}`).then(response => {
+                setCategories(response.data.categories)
+                setLoading(false)
+            })
+            const totalData = await axios.get('/category/total-category').then(response => {
+                setTotalCategories(response.data.categories)
             })
         }
         subscribe()
@@ -37,10 +40,10 @@ const Categories = () => {
     const totalPages = Math.ceil(totalCategories / showPerPage)
     const pages = [...Array(totalPages).keys()]
     const handleChangePage = (id) => {
+        setLoading(true)
         setCurrentPage(id)
     }
     
-    console.log(currentPage)
     return (
         <CRow>
             <CCol xs={12}>
@@ -54,22 +57,25 @@ const Categories = () => {
                 <CCardBody>
                     <CTable striped>
                         <CTableHead>
-                        <CTableRow>
-                            <CTableHeaderCell scope="col">#</CTableHeaderCell>
-                            <CTableHeaderCell scope="col">Class</CTableHeaderCell>
-                            <CTableHeaderCell scope="col">Heading</CTableHeaderCell>
-                            <CTableHeaderCell scope="col">Heading</CTableHeaderCell>
-                        </CTableRow>
+                            <CTableRow>
+                                <CTableHeaderCell scope="col">#</CTableHeaderCell>
+                                <CTableHeaderCell scope="col">Name</CTableHeaderCell>
+                                <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+                                <CTableHeaderCell scope="col">Action</CTableHeaderCell>
+                            </CTableRow>
                         </CTableHead>
                         <CTableBody>
                         {
-                            categories.map((category, index) => <CategoryRow key={index} category={category} count={++index} />)
+                            loading ? <tr><td colSpan={4}>Loading...</td></tr> : categories.map((category, index) => <CategoryRow key={index} category={category} count={++index} />)
                         }
                         </CTableBody>
                     </CTable>
-                    <div className="flex">
+                    <div className="d-flex gap-2">
                         {
-                            pages.map(page => <button key={page} disabled={page == currentPage} onClick={() => handleChangePage(page)}>{page}</button>)
+                            pages.map(page => {
+                                let i = page;
+                                return <button className={`btn ${page == currentPage ? 'btn-danger' : 'btn-success'} text-white`} key={page} disabled={page == currentPage} onClick={() => handleChangePage(page)}>{++i}</button>
+                            })
                         }
                     </div>
                 </CCardBody>

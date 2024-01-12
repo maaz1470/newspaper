@@ -1,25 +1,13 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
-import {
-    CButton,
-    CCard,
-    CCardBody,
-    CCardHeader,
-    CCol,
-    CForm,
-    CFormInput,
-    CFormLabel,
-    CFormTextarea,
-    CRow,
-  } from '@coreui/react'
-  import { DocsExample } from './../../../components'
-import axios from 'axios';
-import TagsInput from 'react-tagsinput';
-import 'react-tagsinput/react-tagsinput.css'
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'
-import Swal from 'sweetalert2';
-const AddCategory = () => {
+import { CCard, CCardBody, CCardHeader, CCol, CForm, CFormInput, CFormLabel, CFormTextarea, CRow } from "@coreui/react";
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import TagsInput from "react-tagsinput";
+import { ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+
+export default function EditCategory(){
+    const [loading, setLoading] = useState(false)
     const [category, setCategory] = useState({
         name: '',
         status: 1,
@@ -27,7 +15,34 @@ const AddCategory = () => {
         meta_description: '',
         meta_keywords: []
     })
-    const [loading, setLoading] = useState(false)
+    const {id} = useParams()
+    const navigate = useNavigate()
+    useState(() => {
+        axios.get(`/category/edit/${id}`).then(response => {
+            console.log(response.data.category)
+            if(response.data.status === 200){
+                let data = response.data.category
+                const metaKeywords = response.data.category.seo
+                delete data.seo;
+                data = {
+                    ...data,
+                    ...metaKeywords
+                }
+                const convertArray = data.meta_keywords.split(',')
+                const remainingData = {
+                    ...data,
+                    meta_keywords: convertArray
+                }
+                setCategory(remainingData)
+            }else if(response.data.status === 404){
+                Swal.fire('Error','Category Not found','error')
+                navigate('/category',{
+                    replace: true
+                })
+            }
+        })
+    },[])
+    console.log(category)
 
     const handleTagChange = (e) => {
         setCategory({
@@ -45,24 +60,6 @@ const AddCategory = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true)
-        axios.post('/category/add',category).then(response => {
-            if(response.data.status === 401){
-                response.data.errors.forEach(el => toast.error(el,{
-                    position: 'top-right'
-                }))
-            }else if(response.data.status === 200){
-                Swal.fire('Success',response.data.message,'success')
-                setCategory({
-                    name: '',
-                    status: 1, 
-                    meta_title: '',
-                    meta_description: '',
-                    meta_keywords: []
-                })
-            }
-            setLoading(false)
-        })
     }
 
     return (
@@ -79,16 +76,16 @@ const AddCategory = () => {
                             <CFormLabel htmlFor="exampleFormControlInput1">Name</CFormLabel>
                             <CFormInput
                                 type="text"
+                                value={category.name}
                                 id="name"
                                 onChange={handleChange}
-                                value={category.name}
                                 name='name'
                                 placeholder="Category Name"
                             />
                         </div>
                         <div className="mb-3">
                             <CFormLabel htmlFor="exampleFormControlInput1">Status</CFormLabel>
-                            <select name="status" onChange={handleChange} value={category.status} className='form-control' id="">
+                            <select name="status" value={category.status} onChange={handleChange} className='form-control' id="">
                                 <option value="1">Published</option>
                                 <option value="0">Unpublished</option>
                             </select>
@@ -125,7 +122,5 @@ const AddCategory = () => {
                 </CCard>
             </CCol>
         </CRow>
-    );
-};
-
-export default AddCategory;
+    )
+}

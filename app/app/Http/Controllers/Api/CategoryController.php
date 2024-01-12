@@ -55,14 +55,36 @@ class CategoryController extends Controller
         }
     }
 
-    public function all($currentPage, $showPerPage){
-        // $categories = Category::all();
-        // if($categories){
-        //     return Response()->json([
-        //         'status'    => 200,
-        //         'categories'    => $categories
-        //     ]);
-        // }
-        return Response()->json([$currentPage, $showPerPage]);
+    public function all(){
+        $limit = (int)$_GET['limit'];
+        $page = (int)$_GET['page'];
+        $skip = $limit * $page;
+        $categories = Category::skip($skip)->take($limit)->get();
+        if($categories){
+            return Response()->json([
+                'status'    => 200,
+                'categories'    => $categories
+            ]);
+        }
+    }
+
+    public function totalCategory(){
+        $categories = Category::all();
+        return Response()->json(['categories' => $categories->count()]);
+    }
+
+    public function edit($id){
+        $category = Category::where('id',$id)->with('seo')->get()->first();
+        if($category){
+            return Response()->json([
+                'status'    => 200,
+                'category'  => $category
+            ]);
+        }else{
+            return Response()->json([
+                'status'    => 404,
+                'message'   => 'Category not found'
+            ]);
+        }
     }
 }

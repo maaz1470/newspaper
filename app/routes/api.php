@@ -32,7 +32,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::prefix('category')->group(function(){
         Route::name('category.')->group(function(){
             Route::post('/add',[CategoryController::class, 'add'])->name('create');
-            Route::get('/{currentPage}/{showPerPage}',[CategoryController::class, 'all'])->name('all');
+            Route::get('/',[CategoryController::class, 'all'])->name('all');
+            Route::get('/total-category',[CategoryController::class, 'totalCategory'])->name('totalCategory');
+            Route::get('/edit/{id}',[CategoryController::class, 'edit'])->name('edit');
         });
     });
 

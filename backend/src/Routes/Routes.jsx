@@ -8,6 +8,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import Categories from "../views/pages/Category/Categories";
 import CategoryLayout from "../views/pages/Category/CategoryLayout";
 import AddCategory from "../views/pages/Category/AddCategory";
+import EditCategory from "../views/pages/Category/EditCategory";
 
 const router = createBrowserRouter([
     {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
                     {
                         path: 'add',
                         element: <AddCategory />
+                    },
+                    {
+                        path: 'edit/:id',
+                        element: <EditCategory />
                     }
                 ]
             }
